@@ -2,6 +2,7 @@
 * different numbers of grades.*/
 
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class GradeCalculator {
@@ -22,12 +23,20 @@ public class GradeCalculator {
         // Get letter grade for each student
         char[] grades = getGrades(studentScores);
 
-        // Print results
+        // Create the file "grades.txt" (not using FileWriter because I don't want to have multiple entries)
+        PrintWriter gradesFile = new PrintWriter("grades.txt");
+
+        // Add individual stats for each trainee
+        addGrades(gradesFile, studentNames, grades);
+
+        /*// Print results
         System.out.println("\nFinal grades: ");
         for(int i = 0; i < grades.length; i++)
         {
             System.out.println(studentNames[i] + ": " + grades[i]);
-        }
+        }*/
+
+        closures(keyboard, gradesFile);
 
     }
 
@@ -76,7 +85,7 @@ public class GradeCalculator {
 
         for(int ix = 0; ix < numStudents; ix++)
         {
-            // Get number
+            // Get number (and make sure it's valid - a student cannot have zero or negative grades)
             do {
                 System.out.println("Please enter the number of grades for " + studentNames[ix]);
                 numberScoresString = keyboard.nextLine();
@@ -88,18 +97,35 @@ public class GradeCalculator {
                 {
                     System.out.println("Encountered an error, please try again");
                 }
+                if (numberScores < 1)
+                {
+                    System.out.println("Invalid number of scores, please try again");
+                }
 
             } while(numberScores < 1);
 
             // Finish setting up array
             studentScores[ix] = new int[numberScores];
 
-            // Get grades for each student
+            // Get grades for each student (check parameter for the range of possible scores can be added by teachers
+            // on an individual basis)
             for(int iy = 0; iy < numberScores; iy++)
             {
                 System.out.println("Please enter score number " + (iy+1) + " for " + studentNames[ix]);
                 String scoreString = keyboard.nextLine();
-                int score = Integer.parseInt(scoreString);
+                int score = 0;
+                while(true)
+                {
+                    try
+                    {
+                        score = Integer.parseInt(scoreString);
+                        break;
+                    }
+                    catch(Exception e)
+                    {
+                        System.out.println("Encountered an error, please try again");
+                    }
+                }
                 studentScores[ix][iy] = score;
             }
         }
@@ -130,7 +156,7 @@ public class GradeCalculator {
 
         char letter;
 
-        // Convert average to letter grade and append to list
+        // Convert average to letter grade and append to list - teachers can change the range limits given here
         if (gradeAvg >= 90)
         {
             letter = 'A';
@@ -153,6 +179,21 @@ public class GradeCalculator {
         }
 
         return letter;
+    }
+
+    private static void addGrades(PrintWriter gradesFile, String[] studentNames, char[] grades) {
+        // Print header
+        gradesFile.println("Final grades: ");
+
+        for(int i = 0; i < grades.length; i++)
+        {
+            gradesFile.printf("%s: %c\n", studentNames[i], grades[i]);
+        }
+    }
+
+    private static void closures(Scanner keyboard, PrintWriter gradesFile) {
+        keyboard.close();
+        gradesFile.close();
     }
 
 }
